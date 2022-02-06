@@ -123,6 +123,10 @@ end
 md"### Entropy and Information Gain"
 
 # ╔═╡ be2f0af0-9bd5-4045-b23d-df2d5a8d301e
+"""entropy(Y::AbstractArray{Bool})
+
+Computes the Shannon's entropy of a given boolean array.
+"""
 function entropy(Y::AbstractArray{Bool})
 	positiveProb = sum(Y) / length(Y)
 	negativeProb = 1 - positiveProb
@@ -137,6 +141,10 @@ function entropy(Y::AbstractArray{Bool})
 end
 
 # ╔═╡ 7b47b611-51ae-4dcb-8125-6910dc873bb6
+"""informationgain(Y::AbstractArray{Bool}, Y1::AbstractArray{Bool}, Y2::AbstractArray{Bool})
+
+Computes the information gain obtained by dividing the boolean array `Y` into the two boolean arrays `Y1` and `Y2`.
+"""
 function informationgain(Y::AbstractArray{Bool}, Y1::AbstractArray{Bool}, Y2::AbstractArray{Bool})
 	return entropy(Y) - entropy(Y2) - entropy(Y1)
 end
@@ -147,6 +155,10 @@ Generating a simple random dataset.
 "
 
 # ╔═╡ 9687278c-f6e6-48ea-bc88-9e118cb27a7d
+"""rowsnorm(X::AbstractMatrix)
+
+Computes the norms of vectors forming the rows of the matrix `X`.
+"""
 function rowsnorm(X::AbstractMatrix)
 	rowsCount = size(X, 1)
 	return [ norm(X[i, :]) for i in 1:rowsCount ]
@@ -217,6 +229,10 @@ mutable struct DecisionTree
 end
 
 # ╔═╡ b92bbcf4-2c64-4c27-b139-ad3fad04243a
+"""splitonvalue(X::AbstractVector, Y::BitVector, value::Number)
+
+Splits the vector `Y` into two parts, `first` and `second`, based on the provided `value` and the vector `X`.
+"""
 function splitonvalue(X::AbstractVector, Y::BitVector, value::Number)
 	first = [ Y[i] for i in eachindex(X) if X[i] <= value ]
 	second = [ Y[i] for i in eachindex(X) if X[i] > value ]
@@ -224,6 +240,10 @@ function splitonvalue(X::AbstractVector, Y::BitVector, value::Number)
 end
 
 # ╔═╡ e8e497b6-6ff9-4a66-8f7b-139206f00d4f
+"""splitonvalue(X::AbstractMatrix, Y::BitVector, attrib::Integer, value::Number)
+
+Splits the dataset `(X, Y)` into two parts, `first` and `second`, based on the provided `value` and `attrib` indicating the column of the matrix `X`.
+"""
 function splitonvalue(X::AbstractMatrix, Y::BitVector, attrib::Integer, value::Number)
 	firstX = X[filter(i -> X[i, attrib] <= value, 1:size(X, 1)), :]
 	secondX = X[filter(i -> X[i, attrib] > value, 1:size(X, 1)), :]
@@ -233,6 +253,10 @@ function splitonvalue(X::AbstractMatrix, Y::BitVector, attrib::Integer, value::N
 end
 
 # ╔═╡ b4a2e7ba-f20a-4865-9c7d-9e62650bddfb
+"""findbestsplitvalue(X::AbstractVector, Y::BitVector)
+
+Finds the split on value that yields the largest information gain.
+"""
 function findbestsplitvalue(X::AbstractVector, Y::BitVector)
 	bestSplitValue = X[1]
 	bestInformationGain = -Inf
@@ -248,6 +272,10 @@ function findbestsplitvalue(X::AbstractVector, Y::BitVector)
 end
 
 # ╔═╡ 318bf121-4df6-4be4-af3a-5524f2bdf6d8
+"""findbestsplit(X::AbstractMatrix, Y::BitVector)
+
+Finds the best attribute and its value on which to split the dataset `(X, Y)` in order to obtain to largest information gain.
+"""
 function findbestsplit(X::AbstractMatrix, Y::BitVector)
 	bestSplitAttrib = 0
 	bestSplitValue::Number = 0.0
@@ -265,6 +293,10 @@ function findbestsplit(X::AbstractMatrix, Y::BitVector)
 end
 
 # ╔═╡ 70165be6-0907-42f5-a284-92224884a328
+"""split(node::DecisionNode, X::AbstractMatrix, Y::BitVector, depth::Integer, maxDepth::Number)
+
+Constructs the decision node `node`, so that it makes such a decision that yields the largest information gain. Recursively constructs its children until no decisions can be made or until the maximal depth of the tree has been reached.
+"""
 function split(node::DecisionNode, X::AbstractMatrix, Y::BitVector, depth::Integer, maxDepth::Number)
 	class = mean(Y) > 0.5
 	if depth >= maxDepth
@@ -295,6 +327,10 @@ function split(node::DecisionNode, X::AbstractMatrix, Y::BitVector, depth::Integ
 end
 
 # ╔═╡ 3629663d-1ad1-4e4f-a645-fc3b0ab25fd3
+"""decisiontree(X::AbstractMatrix, Y::BitVector, maxDepth::Number = Inf)
+
+Constructs a decision tree based on the given dataset `(X, Y)`.
+"""
 function decisiontree(X::AbstractMatrix, Y::BitVector, maxDepth::Number = Inf)
 	root = DecisionNode()
 	split(root, X, Y, 0, maxDepth)
@@ -305,6 +341,10 @@ end
 md"## Classification using the Decision Tree"
 
 # ╔═╡ e6cca667-ce10-40dd-bcc1-080bdf80e915
+"""decisiontree_classify(decisionTree::DecisionTree, X::AbstractVector)
+
+Classifies the observation `X` using the decision tree `decisionTree`.
+"""
 function decisiontree_classify(decisionTree::DecisionTree, X::AbstractVector)
 	currentNode::Union{DecisionNode, LeafNode} = decisionTree.root
 	while isequal(typeof(currentNode), DecisionNode)
@@ -315,16 +355,28 @@ function decisiontree_classify(decisionTree::DecisionTree, X::AbstractVector)
 end
 
 # ╔═╡ 47b600d2-6764-47cb-92a3-227fae506352
+"""decisiontree_classify(decisionTree::DecisionTree, X::AbstractVector)
+
+Classifies all of the observations contained in the matrix `X` using the decision tree `decisionTree`.
+"""
 function decisiontree_classify(decisionTree::DecisionTree, X::AbstractMatrix)
 	return [ decisiontree_classify(decisionTree, X[i, :]) for i in 1:size(X, 1) ]
 end
 
 # ╔═╡ bf50a3ff-d24b-4262-ac34-07390a0d12d4
+"""accuracy(expected::AbstractVector{Bool}, predicted::AbstractVector{Bool})
+
+Computes the classification accuracy given the `expected` and `predicted` vectors.
+"""
 function accuracy(expected::AbstractVector{Bool}, predicted::AbstractVector{Bool})
 	return mean(expected .== predicted)
 end
 
 # ╔═╡ a74b6824-fce5-4a63-8bca-20639ba67348
+"""datasetaccuracy(decisionTree::DecisionTree, X::AbstractMatrix, Y::AbstractVector{Bool})
+
+Computes the accuracy of the decision tree `decisionTree` on the dataset `(X, Y)`.
+"""
 function datasetaccuracy(decisionTree::DecisionTree, X::AbstractMatrix, Y::AbstractVector{Bool})
 	return mean(decisiontree_classify(decisionTree, X) .== Y)
 end
@@ -1298,12 +1350,12 @@ version = "0.9.1+5"
 # ╟─a6f11c90-9ac3-4f80-baf8-410a821d0138
 # ╠═81b1b574-ece8-47ca-9d82-3c54139b3cab
 # ╠═a27c8f45-46f7-490a-865c-a4d1e2cec7a5
-# ╟─5fa90874-6586-4424-a915-cf70ee929906
-# ╟─4c05fe92-57ea-42cd-a5f6-c94a53968376
-# ╟─568fd548-0a02-46cd-8807-5b25daa00836
-# ╟─0f21904d-d844-494c-a5e2-72f19375699f
-# ╟─d05b5d09-cab5-43f8-b44f-08d9a2e0663e
-# ╟─4d6d622a-dc67-4513-9e25-c6da39dc3e8b
+# ╠═5fa90874-6586-4424-a915-cf70ee929906
+# ╠═4c05fe92-57ea-42cd-a5f6-c94a53968376
+# ╠═568fd548-0a02-46cd-8807-5b25daa00836
+# ╠═0f21904d-d844-494c-a5e2-72f19375699f
+# ╠═d05b5d09-cab5-43f8-b44f-08d9a2e0663e
+# ╠═4d6d622a-dc67-4513-9e25-c6da39dc3e8b
 # ╟─ee470f81-01f2-4598-b688-70054c750054
 # ╠═be2f0af0-9bd5-4045-b23d-df2d5a8d301e
 # ╠═7b47b611-51ae-4dcb-8125-6910dc873bb6
@@ -1326,7 +1378,7 @@ version = "0.9.1+5"
 # ╠═47b600d2-6764-47cb-92a3-227fae506352
 # ╠═bf50a3ff-d24b-4262-ac34-07390a0d12d4
 # ╠═a74b6824-fce5-4a63-8bca-20639ba67348
-# ╠═78d96297-19db-4333-a7e0-c8cf0bead81e
+# ╟─78d96297-19db-4333-a7e0-c8cf0bead81e
 # ╠═ac013cec-2922-42fd-ae17-0199367e0964
 # ╠═43b65225-7426-4fb6-a994-78ce38421f61
 # ╠═da19c491-f41f-4255-8b02-9d597a533db6
