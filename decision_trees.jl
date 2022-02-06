@@ -293,11 +293,11 @@ function findbestsplit(X::AbstractMatrix, Y::BitVector)
 end
 
 # ╔═╡ 70165be6-0907-42f5-a284-92224884a328
-"""split(node::DecisionNode, X::AbstractMatrix, Y::BitVector, depth::Integer, maxDepth::Number)
+"""splitnode(node::DecisionNode, X::AbstractMatrix, Y::BitVector, depth::Integer, maxDepth::Number)
 
 Constructs the decision node `node`, so that it makes such a decision that yields the largest information gain. Recursively constructs its children until no decisions can be made or until the maximal depth of the tree has been reached.
 """
-function split(node::DecisionNode, X::AbstractMatrix, Y::BitVector, depth::Integer, maxDepth::Number)
+function splitnode(node::DecisionNode, X::AbstractMatrix, Y::BitVector, depth::Integer, maxDepth::Number)
 	class = mean(Y) > 0.5
 	if depth >= maxDepth
 		return LeafNode(class)
@@ -313,11 +313,11 @@ function split(node::DecisionNode, X::AbstractMatrix, Y::BitVector, depth::Integ
 
 	leftChild = DecisionNode()
 	leftChild.parent = node
-	leftChild = split(leftChild, firstX, firstY, depth + 1, maxDepth)
+	leftChild = splitnode(leftChild, firstX, firstY, depth + 1, maxDepth)
 	
 	rightChild = DecisionNode()
 	rightChild.parent = node
-	rightChild = split(rightChild, secondX, secondY, depth + 1, maxDepth)
+	rightChild = splitnode(rightChild, secondX, secondY, depth + 1, maxDepth)
 		
 	node.leftChild = leftChild
 	node.rightChild = rightChild
@@ -333,7 +333,7 @@ Constructs a decision tree based on the given dataset `(X, Y)`.
 """
 function decisiontree(X::AbstractMatrix, Y::BitVector, maxDepth::Number = Inf)
 	root = DecisionNode()
-	split(root, X, Y, 0, maxDepth)
+	splitnode(root, X, Y, 0, maxDepth)
 	return DecisionTree(root)
 end
 
